@@ -1,0 +1,89 @@
+%\documentclass[journal]{IEEEtran}
+%\documentclass[conference]{IEEEtran}
+\documentclass[9pt,conference]{sig-alternate-05-2015}
+
+%the following three make the math more compact, but should be put before
+%scalerel. Othwerwise, error in latex appear.
+\setlength\thinmuskip{1mu}
+\setlength\medmuskip{1mu plus 1mu minus 1mu}
+\setlength\thickmuskip{2mu plus 1mu}
+
+\usepackage{siunitx}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{cite}
+\usepackage{mathrsfs}
+\usepackage{amssymb,amsmath}
+\usepackage{kbordermatrix}
+\usepackage{qbordermatrix}
+\usepackage[flushleft]{threeparttable}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{textcomp}
+\usepackage{multirow}
+\usepackage{booktabs}
+\usepackage{balance}
+\usepackage{color}
+%subparagraph not defined in IEEEtran but needed by titlesec
+\newcommand{\subparagraph}{}
+\usepackage[compact]{titlesec}
+\usepackage{etoolbox}
+\usepackage{gensymb}
+
+\makeatletter
+\patchcmd{\ttlh@hang}{\parindent\z@}{\parindent\z@\leavevmode}{}{}
+\patchcmd{\ttlh@hang}{\noindent}{}{}{}
+\makeatother
+%\proof is already defined in amsthm, so undefine it before loading
+\makeatletter
+\let\oldproof\proof
+\let\oldendproof\endproof
+\let\proof\@undefined
+\let\endproof\@undefined
+\makeatother
+\usepackage{amsthm}
+
+\def\figurename{Fi\-gure}
+\def\algname{Algorithm}
+\graphicspath{{Fig/}}
+\newcommand{\tum}{Technical University of Munich}
+
+%remove the copyright box
+\makeatletter
+\def\@copyrightspace{\relax}
+\makeatother
+
+%\pagenumbering{arabic}
+
+\renewcommand{\baselinestretch}{1} % spacing between lines 
+
+\begin{document}
+
+\title{Algorithmic Part for Printing-Based Microfabrication}
+
+\maketitle
+
+%\input{abstract}
+%\input{introduction}
+%\input{background}
+\input{method}
+%\input{results}
+%\input{conclusion}
+
+\bibliographystyle{IEEEtran}
+{\tiny
+\bibliography{IEEEabrv,abrv,bioeda,bioman,other}
+}
+%\begin{IEEEbiography}
+%[{\includegraphics[width=1in,clip,keepaspectratio]{biophoto/TMTseng.eps}}]
+%{Tsun-Ming Tseng}
+%received the bachelor degree in electronics engineering from National Chiao Tung University (NCTU),
+%Hsinchu, Taiwan, in 2010,
+%and the master degree in communications engineering from Technical University of Munich (TUM),
+%Munich, Germany, in 2013.
+%He is currently pursuing a Dr.-Ing. degree at the Institute for Electronic Design Automation, TUM.
+%His research interests focus on large-scale design automation.
+%\end{IEEEbiography}
+
+\end{document}

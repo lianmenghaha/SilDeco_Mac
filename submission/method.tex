@@ -1,0 +1,433 @@
+\section{Algorithm and Software}\label{sec:method}
+
+\begin{figure}[t]
+	\fontsize{11}{11} \fontfamily{lmss} \selectfont
+	\centerline{\resizebox{8.5cm}{!}{\input{Fig/flow.eps_tex}}}
+	\caption{The overall flow of the proposed algorithm.}
+	\label{fig:flow}
+	\normalsize
+\end{figure}
+
+The core idea of our algorithm is to decompose the entire design into groups of small patterns and then print them separately to avoid potential printing problems.
+Specifically,
+patterns assigned to the same group are guaranteed to cause no printing problem,
+so that by serially printing each group,
+i.e., printing a group only after the solvent for printing its previous group evaporates completely,
+patterns are safely superposed to achieve the target design.
+
+The algorithm in general consists of two major steps:
+(1) the preparation step (Section~\ref{prep}) and (2) the group assignment step (Section~\ref{gro}).
+\figurename~\ref{fig:flow} shows the overall flow of the proposed algorithm.
+We have developed a software tool to implement the algorithm.
+The tool takes a PDF file containing the target design as its input
+and outputs several PDF files as the grouping results.
+ 
+ 
+\subsection{Preparation}\label{prep}
+
+The preparation step further consists of several sub-steps:
+With the given PDF design,
+we perform \textbf{pattern extraction} to extract the original patterns,
+each of which is a closed drawing path.
+For each original pattern,
+we first perform \textbf{pattern decomposition} to decompose the original pattern into small patterns.
+Then we perform \textbf{conflict detection} to locate the hotspots for merging and Laplace pressure problems.
+We define a conflict to occur when a pre-defined threshold,
+e.g., the spacing distance or the dimension difference of patterns, is violated.
+A conflict may not necessarily lead to a printing problem,
+but the printing result cannot be guaranteed.
+After conflict detection,
+we perform \textbf{pattern combination} and then \textbf{conflict update} to combine some decomposed small patterns back to large patterns.
+In this way,
+the pattern number can be reduced to save some computational effort required for the later group assignment step.
+Finally, to ensure that contacted patterns will be merged together but not separate after printing,
+we perform \textbf{cutting line shifting} to create an overlapping region for the contacted patterns,
+and one more conflict update is followed to specify new conflict relations that may be caused by cutting line shifting.
+
+All the information obtained in this step including pattern area,
+pattern drawing path, spacing distances between patterns,
+and conflict relations between patterns,
+is sent to the group assignment step as the input for optimization.
+
+Except pattern extraction,
+which is straightforward implemented by extracting the path information from the given PDF file,
+the algorithms applied in all sub-steps are described as follows.
+
+\subsubsection{Pattern Decomposition}\label{sec:pd}
+
+\begin{figure}[t]
+	\fontsize{14}{14} \fontfamily{lmss} \selectfont
+	\centerline{\resizebox{8.5cm}{!}{\input{Fig/selfcon.eps_tex}}}
+	\caption{An example of pattern decomposition by cutting the pattern. (a) The original pattern with two intra-conflicts. (b) A decomposition result that resolves no intra-conflict. (b) A decomposition result that resolves both intra-conflicts.}
+	\label{fig:selfcon}
+	\normalsize
+\end{figure}
+
+Though conflicts occuring between different patterns (\textit{inter-conflicts}),
+can be resolved by group assignment,
+conflicts occuring within the same pattern (\textit{intra-conflicts})
+are not resolvable directly by group assignment.
+\figurename~\ref{fig:selfcon}(a) shows a pattern with two intra-conflicts.
+To resolve the intra-conflict,
+we propose to decompose the pattern containing the intra-conflict and assign the conflict parts to different small patterns,
+i.e., transforming the intra-conflict into an \textit{inter-conflict}.
+
+However, there are many ways to decompose patterns,
+and an arbitrary decomposition method may fail to resolve the intra-conflict.
+\figurename~\ref{fig:selfcon}(b) and (c) show two examples of pattern decomposition,
+both decomposing the pattern shown in \figurename~\ref{fig:selfcon}(a) into two small patterns,
+but the outcomes are much different.
+
+In general, a smaller pattern is less possible to have the intra-conflict,
+but decomposing the original pattern into relatively smaller patterns indicates the increase of pattern numbers,
+which can cause a computational burden for the later group assignment.
+Therefore,
+the target of the proposed decomposition method is to resolve all intra-conflicts,
+while avoiding performing redundant decomposition.
+
+\begin{figure}[t]
+	\fontsize{14}{14} \fontfamily{lmss} \selectfont
+	\centerline{\resizebox{8.5cm}{!}{\input{Fig/concave.eps_tex}}}
+	\caption{Deduction of concave polygons for (a) merging conflict (b) Laplace pressure conflict.}
+	\label{fig:concave}
+	\normalsize
+\end{figure}
+
+By analyzing the formation of intra-conflict,
+we notice that if an intra-conflict occurs,
+it implies that the concerning pattern must be a concave polygon.
+That is, there exists at least one line connected to two vertices (a diagonal) of the polygon lies partially/completely outside the polygon.
+\figurename~\ref{fig:concave} shows the analysis of the two conflict types,
+where the diagonals are colored in red.
+In other words, if the concerning pattern is a convex polygon,
+it is guaranteed that no intra-conflict can occur.
+
+%\begin{proof}
+%Considering ``a self-conflict occurs'' as proposition A and ``the concerning pattern is a concave polygon'' as proposition B, the given description can be modeled as
+%$A \rightarrow B$, equivalent to $\neg A \lor B$.
+%Since a polygon must be either convex or concave,
+%``the concerning pattern is a convex polygon'' can be modeled as $\neg B$ and thus the to-be-proved description can be modeled as $\neg B \rightarrow \neg A \iff \neg \neg B \lor \neg A \iff \neg A \lor B$.
+%\end{proof}
+
+In our method, to achieve convex patterns,
+we first treat the original pattern as a polygon and traverse all its vertices.
+For each vertex whose corresponding internal angle is larger than 180 degree,
+we extend the two edges connected to the vertex toward the inside of the polygon until they reach the polygon boundary.
+The shorter extension is then applied as a cut to decompose the original design.
+An example is shown in \figurename~\ref{fig:cut_combine}(a).
+By iteratively performing the cutting process,
+every internal angle that is larger than 180 degree will be divided into two angles:
+one is 180 degree and another is less than 180 degree,
+meeting the condition that all resultant polygons/patterns are convex.
+
+\begin{figure}[t]
+	\fontsize{14}{14} \fontfamily{lmss} \selectfont
+	\centerline{\resizebox{8.5cm}{!}{\input{Fig/cut_combine.eps_tex}}}
+	\caption{(a) Cutline selection in design decomposition. (b) Conflict inheritance in pattern combination.}
+	\label{fig:cut_combine}
+	\normalsize
+\end{figure}
+
+\subsubsection{Conflict Detection}\label{sec:cd}
+
+After design decomposition, we obtain a set of convex patterns.
+In this sub-step, we specify the conflict relation between patterns.
+
+To detect the merging conflict,
+for each pair of \textit{non-contacted} patterns,
+we measure their shortest distance.
+Two patterns will be marked to have the merging conflict with each other
+if their spacing distance is smaller than a constant $\alpha$.
+$\alpha$ is user-defined and has a default value as 
+$\text{min}(\rho,\;\;\; \delta)$,
+where $\rho$ is determined according to the design size
+(multiplying the perimeter of the smallest bounding box encircling the entire design by 0.01),
+and $\delta$ is determined according to the pattern spacing distance
+(multiplying the minimum distance between any pair of patterns in the design by 3).
+
+To detect the Laplace pressure conflict,
+for each pair of \textit{contacted} patterns,
+we compare their area and the lengths of their contacted edges.
+If their area ratio (the thin one over the thick one)
+is smaller than a constant $\beta$ and the length ratio of their contacted edges (still the thin one over the thick one)
+is smaller than a constant $\gamma$,
+we mark these patterns to have the Laplace pressure conflict.
+Note that unlike the merging conflict that is a bidirectional relation,
+here only the thin pattern can be absorbed by the thick pattern.
+Similar to $\alpha$, $\beta$ and $\gamma$ are also user-defined,
+and by default $\beta$ is set to 0.2 and $\gamma$ is set to $\sqrt{0.2}$.
+
+\subsubsection{Pattern Combination and Conflict Update}
+
+In this sub-step, we combine contacted patterns back to larger patterns to save the computational effort required for the later group assignment step.
+The patterns that are contacted and do not have any conflict relation are marked to be allowed for combination.
+For each time patterns are combined,
+their conflict relations will be inherited.
+\figurename~\ref{fig:cut_combine}(b) shows an example,
+where there are initially three patterns $P_a$, $P_b$, and $P_c$.
+$P_a$ has a merging conflict with $P_b$.
+$P_c$ is contacted with both $P_a$ and $P_b$
+and does not have the Laplace pressure conflict with either of them.
+If we combine $P_b$ and $P_c$,
+the resultant pattern cannot be further combined with $P_a$,
+since it inherits the merging conflict between $P_a$ and $P_b$.
+
+\subsubsection{Cutting Line Shifting}
+
+As metioned in Section~\ref{sec:pd},
+we cut the original patterns to realize pattern decomposition.
+\figurename~\ref{fig:cld}(a) shows two contacted patterns $P_a$ and $P_b$ that once belonged to the same original pattern.
+If we directly print $P_a$ and $P_b$,
+it is possible that the printed patterns of $P_a$ and $P_b$ are separate but not merged together.
+Therefore, to ensure that the contacted patterns will not be actually ``cut apart'',
+we shift the shorter contacted edge, namely the \textit{cutting line},
+to produce an overlapping region.
+\figurename~\ref{fig:cld}(b) shows the shifting result of \figurename~\ref{fig:cld}(a),
+where $e_a$ of $P_a$ is shifted toward $P_b$ to form a new $P_a^\prime$.
+The shifting length ($w_a$ in \figurename~\ref{fig:cld}(b))
+is defined as the product of a constant $\epsilon$ and the depth of the unchanged pattern viewed from the cutting line
+($w_b$ in \figurename~\ref{fig:cld}(b)).
+$\epsilon$, similar to other constants,
+is user-defined and has a default value as 0.2.
+However, if the resulting $w_a$ is too small to achieve a sufficiently large overlapping region,
+i.e., $w_a < \rho$ ($\rho$ is defined in Section~\ref{sec:cd}),
+the default value of $\epsilon$ will be set to 0.7.
+
+\begin{figure}[t]
+	\fontsize{14}{14} \fontfamily{lmss} \selectfont
+	\centerline{\resizebox{8.5cm}{!}{\input{Fig/cld.eps_tex}}}
+	\caption{(a) Decomposed patterns before cutting line shifting. (b) Overlapping introduction after cutting line shifting.}
+	\label{fig:cld}
+	\normalsize
+\end{figure}
+
+After cutting line shifting,
+some patterns are extended, 
+leading to some new conflicts.
+Thus, we perform one last conflict update at the end of the preparation step.
+The whole preparation step is implemented using Python,
+and its outputs are stored as plain-text files.
+
+\subsection{Group Assignment}\label{gro}
+
+Since both types of printing conflicts can be resolved
+by assigning the conflict patterns to different groups,
+an intuitive but safe method is to label each pattern as an individual group.
+However, patterns can actually be printed together without needing to wait others to dry,
+as long as the patterns assigned to the same group have no conflict.
+
+\begin{figure}[t]
+	\fontsize{14}{14} \fontfamily{lmss} \selectfont
+	\centerline{\resizebox{8.5cm}{!}{\input{Fig/subopt.eps_tex}}}
+	\caption{Different group assignment results. (a) Suboptimal. (b) Optimal.}
+	\label{fig:subopt}
+	\normalsize
+\end{figure}
+
+Nevertheless, choosing a pattern to print implies that all patterns conflictng with the chosen pattern become temporarily unprintable,
+and arbitrarily choosing patterns to print can lead to suboptimal solutions.
+\figurename~\ref{fig:subopt} shows an example,
+in which $P_a$ has a merging conflict with $P_b$,
+and $P_b$ (thin) has a Laplace pressure conflict with $P_c$ (thick).
+If $P_a$ is first chosen for printing,
+i.e., $P_a$ is assigned to the first group,
+as shown in \figurename~\ref{fig:subopt}(a),
+$P_b$ cannot be printed together with $P_a$ owing to the merging conflict,
+and $P_c$ cannot be printed either since it can only be printed after $P_b$ is printed.
+Eventually, three groups are needed if $P_a$ is printed first.
+Actually, the optimal solution can be achieved if $P_b$ is printed first,
+as shown in \figurename~\ref{fig:subopt}(b),
+where only two groups are required.
+
+Considering the large optimization room,
+we mathematically model the group assignment problem.
+The problem is solved in two sub-steps to balance the solution quality and solving runtime.
+The first step is to minimize the total group number to pack as many patterns as possible into the same groups.
+By fixing the group number to the minimum value,
+which has drastically reduced the problem space,
+the second sub-step is to reassign the patterns to minimize the total required drying time.
+We implement a C++ program to build the corresponding integer linear programming (ILP)
+models for the two steps,
+and perform the optimization applying the state-of-the-art ILP solver Gurobi~\cite{gurobi}.
+
+\subsubsection{Group Number Minimization}\label{gnm}
+
+For each pattern $P_i$,
+we maintain an integer variable $g_i$ representing the group that the pattern is assigned to.
+The lower bound of $g_i$ is set to 1 for the first group,
+and the upper bound of $g_i$ is set to the number of patterns,
+which is the maximum possible number of groups when a group contains only one pattern. 
+An integer variable $g_{tot}$ is introduced to denote the total number of groups.
+
+\paragraph{Modeling of Laplace Pressure Conflict: }
+
+For each pair of patterns ($P_i$ and $P_j$) that have the Laplace pressure conflict,
+the thin pattern ($P_i$) needs to be printed earlier than the thick pattern ($P_j$) to prevent possible ink absorption.
+The constraint can be simply modeled as:
+\begin{align}
+\quad g_i + 1 \leq g_j. \label{eq:merge}
+\end{align}
+
+\paragraph{Modeling of Merging Conflict: }
+
+For each pair of patterns ($P_i$ and $P_j$) that have the merging conflict,
+they need to be assigned to different groups,
+implying that
+\begin{align}
+g_i \neq g_j. \label{eq:neq}
+\end{align}
+Since (\ref{eq:neq}) is not a linear representation,
+we first transform it into:
+\begin{align}
+g_i + 1 \leq g_j \;\;\; \lor \;\;\; g_i \geq g_j + 1, \label{eq:or}
+\end{align}
+which means that either $P_i$ is printed earlier than $P_j$,
+or $P_j$ is printed earlier than $P_i$.
+By applying an extremely large constant $\mathcal{M}$,
+i.e., the ``Big M method''~\cite{MITILP},
+we linearize (\ref{eq:or}) as:
+\begin{align}
+&g_i + 1 \leq g_j + \mathcal{M} \cdot q, \label{eq:1} \\
+&g_j + 1 \leq g_i + \mathcal{M} \cdot (1-q), \label{eq:2}
+\end{align}
+where $\mathcal{M}$ is set to 1 million in our program,
+and $q$ is a binary auxiliary variable.
+When $q$ is set to 1, (\ref{eq:1}) becomes a tautology regardless of the value selection of $g_i$ and $g_j$ since they are always much smaller than $\mathcal{M}$.
+In the meanwhile, as the term $\mathcal{M} \cdot (1-q)$ in (\ref{eq:2}) becomes $\mathcal{M} \cdot 0=0$ and is thus removed,
+(\ref{eq:2}) becomes $g_j + 1 \leq g_i$,
+which indicates that $P_j$ is printed earlier than $P_i$.
+By contrast, when $q$ is set to 0,
+(\ref{eq:1}) becomes $g_i + 1 \leq g_j$ and (\ref{eq:2}) becomes a tautology 
+so that $P_i$ is printed earlier than $P_j$.
+
+\paragraph{Optimization Objective: }
+
+To confine the group number, for each pattern $P_i$, we build the following constraint
+\begin{align}
+g_i \leq g_{tot}. \label{eq:confine}
+\end{align}
+And the optimization problem can be modeled as:
+\begin{align}
+&\text{Minimize:}   \hskip 5pt g_{tot} \nonumber \\
+&\text{Subject to:} \hskip 5pt \text{(\ref{eq:merge}) and (\ref{eq:1})--(\ref{eq:confine}).} \nonumber
+\end{align}
+
+\subsubsection{Drying Time Minimization}
+
+Fundamentally, the evaporation rate at a given point in the layout immediately after printing
+is governed by the local solvent concentration in the gas phase. 
+This local solvent concentration,
+in turn, will depend on the mass transport of solvent in the system as well as the distribution of
+ink in the pattern.
+Consequently, given the minimized number of groups,
+there can be multiple conflict-free solutions that represent different drying times depending on the number,
+area, and position of objects printed in a given group.
+
+In this sub-step,
+we search for a group assignment solution with the minimum required drying time based on the group number minimization result,
+i.e., with $g_{tot}$ fixed to its minimum value.
+Since an under-drying point can cause the solvent concentration surrounding this point to increase,
+we model the local solvent concentration at a point as the summation of the solvent concentration increases caused by all under-drying points.
+
+Since the longest drying time of one under-drying point dominates the required drying time of the pattern that the point belongs to,
+and the longest drying time of one pattern dominates the required drying time of the group that the pattern assigned to,
+minimizing the required drying time of a group in this sub-step is modeled as minimizing the longest drying time of any under-drying point belongs to this group.
+
+%we model the solvent concentration increase caused by one single under-drying point as a time-invariant Gaussian function with respect to the distances from the point.
+%In other words,
+%the local solvent concentration is the summation of the solvent concentration values caused by all under-drying points.
+%We further model the local solvent concentration to be linearly correlated to the required drying time for the \textit{in situ} under-drying point.
+
+The implementation of this sub-step consists of \textbf{area tiling},
+\textbf{modeling of drying time increase},
+and \textbf{mathematical model construction},
+each of which will be explained in the following.
+
+\paragraph{Area Tiling: }
+To physically represent a point,
+we decompose the entire design into $\#tile_x \times \#tile_y$ square tiles.
+A smaller tile makes the model more accurate,
+but using smaller tiles implies a larger number of tiles to be modeled.
+Thus,
+this is a tradeoff between accuracy and the required computational effort.
+In our experiments,
+we set the total tile number to the scale of $10^4$.
+The tile sidelength will then be calculated according to the design size.
+
+Since a pattern may only occupy part of a tile,
+for each tile and each pattern covering that tile,
+we calculate a occupancy ratio.
+\figurename~\ref{fig:occupy} shows an example containing 9 tiles covered by 3 patterns.
+For each pattern, we maintain a set of tuples in a form as $(m,n,\lambda)$,
+where $(m,n)$ refers to the tile index and $\lambda$ is the occupancy ratio.
+
+\paragraph{Modeling of Drying Time Increase: }
+
+To model the solvent concentration increase,
+for each tile containing part of a under-drying pattern,
+we build a time-invariant Gaussian function taking the distance from any tile to this tile as the first argument and the occupancy ratio as the second argument.
+The total required drying time of a tile is calculated by summing up the drying time increase caused by all tiles.
+
+For implementation,
+we use the normal distribution function provided by the C++ standard library to construct the Gaussian function with the mean and the standard deviation set to $0$ and $(\#tile_x+\#tile_y)/8$,
+respectively.
+A 3-D matrix is then constructed to denote the drying time increase for each tile caused by printing each pattern.
+We denote each entry as $dt_{i,m,n}$,
+where $i$ is the pattern index ($P_i$) and $(m,n)$ is the tile index.
+%For each tile containing part of $P_i$,
+%we multiply the corresponding occupancy ratio by the Gaussian function
+%the distribution with the corresponding occupancy ratio to calculate the drying time increase $\Delta dt_{i,m_2,n_2}$ for each tile $(m_2,n_2)$ and update $dt_{i,m_2,n_2}$ accordingly by $dt_{i,m_2,n_2}=dt_{i,m_2,n_2} + \Delta dt_{i,m_2,n_2}$.
+\figurename~\ref{fig:dryincrease} shows an example of calculating the drying time increase caused by printing $P_a$ to the under-drying $P_b$.
+$P_a$ is first decomposed into four parts with regard to the occupied tiles and the drying time increase of $P_b$ caused by each part of $P_a$ is summed up by considering the tile distance and the occupancy ratio.
+
+\begin{figure}[t]
+	\fontsize{14}{14} \fontfamily{lmss} \selectfont
+	\centerline{\resizebox{8.5cm}{!}{\input{Fig/occupy.eps_tex}}}
+	\caption{Illustration of tile occupancy.}
+	\label{fig:occupy}
+	\normalsize
+\end{figure}
+
+\begin{figure}[t]
+	\fontsize{14}{14} \fontfamily{lmss} \selectfont
+	\centerline{\resizebox{8.5cm}{!}{\input{Fig/dryincrease.eps_tex}}}
+	\caption{The drying time increase ($dt_{a,2,3}$) of tile (2,3) caused by printing $P_a$. $f_g$ is the Gaussian function that models the drying time increase and takes the tile distance as well as the occupancy ratio as the arguments.}
+	\label{fig:dryincrease}
+	\normalsize
+\end{figure}
+
+\paragraph{Mathematical Model Construction: }
+For each pattern and for each group,
+we introduce a binary variable $bg_{i,k}$ to denote whether $P_i$ is assigned to the $k$-th group.
+The relation between $bg_{i,k}$ and $g_i$ introduced in Section~\ref{gnm} can then be modeled as:
+\begin{align}
+g_i = \sum_k k \times bg_{i,k}, \label{eq:gibgi}
+\end{align}
+and for each pattern we need
+\begin{align}
+\sum_k bg_{i,k}=1, \label{eq:bgi1}
+\end{align}
+to make exact one $bg_{i,k}$ be 1,
+i.e., each pattern is exactly assigned to one group.
+
+Suppose the total required drying time of each tile for each group 
+is denoted by $t_{k,m,n}$,
+where $k$ is the group index and $(m,n)$ is the tile index.
+$t_{k,m,n}$ can then be calculated by adding up the drying time increases caused by printing all the patterns assigned to this group:
+\begin{align}
+t_{k,m,n} = \sum_i dt_{i,m,n} \times bg_{i,k}. \label{eq:dtmnk}
+\end{align}
+Since the total required drying time for each group is dominated by the maximum drying time among tiles,
+for each tile we introduce the following constraint:
+\begin{align}
+t_{k,m,n} \leq t_{k,max}, \label{eq:dtmax}
+\end{align}
+where $t_{k,max}$ is an auxiliary variable to denote the maximum drying time for group $k$ among all the tiles.
+In this way,
+to minimize the total required drying time to print all the patterns,
+we minimize the summation of the maximum drying time among the tiles for each group.
+The complete optimization problem can be modeled as:
+\begin{align}
+&\text{Minimize:}   \hskip 5pt \sum_k t_{k,max} \nonumber \\
+&\text{Subject to:} \hskip 5pt \text{(\ref{eq:merge}) and (\ref{eq:1})--(\ref{eq:dtmax}).} \nonumber
+\end{align}

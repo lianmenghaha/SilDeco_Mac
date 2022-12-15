@@ -1,0 +1,7 @@
+no merge conflict:
+
+no absorption conflict:
+o10: o9, 
+o12: o11, 
+o5: o6, 
+o7: o8, 

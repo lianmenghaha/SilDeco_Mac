@@ -1,0 +1,10 @@
+no merge conflict:
+o15: o14, 
+o14: o15, 
+
+no absorption conflict:
+o6: o7, 
+o9: o8, 
+o15: o14, 
+o11: o10, 
+o13: o12, 

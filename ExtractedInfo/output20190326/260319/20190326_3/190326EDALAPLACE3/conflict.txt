@@ -1,0 +1,10 @@
+no merge conflict:
+FIN
+
+no absorption conflict:
+o3 2 o1 o2
+FIN
+
+distance:
+o2 o1 4.250000
+FIN

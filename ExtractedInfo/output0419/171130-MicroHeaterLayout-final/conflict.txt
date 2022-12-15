@@ -1,0 +1,61 @@
+no merge conflict:
+o18 3 o3 o19 o26
+o19 3 o13 o18 o27
+o1 2 o2 o23
+o9 2 o8 o30
+o34 3 o3 o4 o26
+o6 4 o7 o13 o36 o37
+o12 3 o4 o11 o25
+o2 4 o1 o3 o22 o25
+o36 3 o5 o6 o27
+o23 4 o1 o11 o22 o24
+o32 2 o10 o22
+o13 3 o6 o19 o35
+o30 4 o9 o14 o29 o31
+o7 3 o6 o8 o29
+o3 4 o2 o18 o24 o34
+o29 4 o7 o15 o28 o30
+o35 3 o4 o13 o27
+o16 2 o10 o22
+o8 4 o7 o9 o28 o31
+o28 4 o8 o21 o29 o37
+o31 4 o8 o17 o30 o33
+o24 4 o3 o10 o23 o25
+o14 4 o15 o21 o30 o37
+o10 4 o11 o16 o24 o32
+o4 4 o5 o12 o34 o35
+o26 4 o11 o18 o25 o34
+o25 4 o2 o12 o24 o26
+o27 4 o19 o20 o35 o36
+o15 4 o14 o17 o29 o33
+o11 4 o10 o12 o23 o26
+o37 3 o6 o14 o28
+o5 3 o4 o20 o36
+o20 3 o5 o21 o27
+o17 2 o15 o31
+o22 4 o2 o16 o23 o32
+o21 3 o14 o20 o28
+o33 1 o31
+FIN
+
+no absorption conflict:
+o12 2 o26 o34
+o9 2 o31 o33
+o18 2 o4 o34
+o2 2 o23 o24
+o5 2 o27 o35
+o32 1 o16
+o13 2 o27 o36
+o7 2 o28 o37
+o3 2 o25 o26
+o19 2 o4 o35
+o20 2 o6 o36
+o8 2 o29 o30
+o1 2 o22 o32
+o14 2 o28 o29
+o10 2 o22 o23
+o15 2 o30 o31
+o11 2 o24 o25
+o21 2 o6 o37
+o33 1 o17
+FIN

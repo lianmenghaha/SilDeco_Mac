@@ -1,0 +1,69 @@
+%% Creator: Inkscape inkscape 0.91, www.inkscape.org
+%% PDF/EPS/PS + LaTeX output extension by Johan Engelen, 2010
+%% Accompanies image file 'concave.eps' (pdf, eps, ps)
+%%
+%% To include the image in your LaTeX document, write
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics{<filename>.pdf}
+%% To scale the image, write
+%%   \def\svgwidth{<desired width>}
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics[width=<desired width>]{<filename>.pdf}
+%%
+%% Images with a different path to the parent latex file can
+%% be accessed with the `import' package (which may need to be
+%% installed) using
+%%   \usepackage{import}
+%% in the preamble, and then including the image with
+%%   \import{<path to file>}{<filename>.pdf_tex}
+%% Alternatively, one can specify
+%%   \graphicspath{{<path to file>/}}
+%% 
+%% For more information, please see info/svg-inkscape on CTAN:
+%%   http://tug.ctan.org/tex-archive/info/svg-inkscape
+%%
+\begingroup%
+  \makeatletter%
+  \providecommand\color[2][]{%
+    \errmessage{(Inkscape) Color is used for the text in Inkscape, but the package 'color.sty' is not loaded}%
+    \renewcommand\color[2][]{}%
+  }%
+  \providecommand\transparent[1]{%
+    \errmessage{(Inkscape) Transparency is used (non-zero) for the text in Inkscape, but the package 'transparent.sty' is not loaded}%
+    \renewcommand\transparent[1]{}%
+  }%
+  \providecommand\rotatebox[2]{#2}%
+  \ifx\svgwidth\undefined%
+    \setlength{\unitlength}{426.17262862bp}%
+    \ifx\svgscale\undefined%
+      \relax%
+    \else%
+      \setlength{\unitlength}{\unitlength * \real{\svgscale}}%
+    \fi%
+  \else%
+    \setlength{\unitlength}{\svgwidth}%
+  \fi%
+  \global\let\svgwidth\undefined%
+  \global\let\svgscale\undefined%
+  \makeatother%
+  \begin{picture}(1,0.16485083)%
+    \put(0,0){\includegraphics[width=\unitlength]{concave.eps}}%
+    \put(0.22103355,0.07492909){\color[rgb]{0,0,0}\makebox(0,0)[b]{\smash{small gap (outside)}}}%
+    \put(0.17038909,0.06378432){\color[rgb]{0,0,0}\makebox(0,0)[b]{\smash{}}}%
+    \put(0.26563995,0.02418045){\color[rgb]{0,0,0}\makebox(0,0)[b]{\smash{inner side of pattern}}}%
+    \put(0.17849304,0.01303568){\color[rgb]{0,0,0}\makebox(0,0)[b]{\smash{}}}%
+    \put(0.04816176,0.01644342){\color[rgb]{0,0,0}\makebox(0,0)[b]{\smash{vertices}}}%
+    \put(-0.00248269,0.00529865){\color[rgb]{0,0,0}\makebox(0,0)[b]{\smash{}}}%
+    \put(0.01922356,0.14587907){\color[rgb]{0,0,0}\makebox(0,0)[b]{\smash{(a)}}}%
+    \put(-0.0314209,0.20497569){\color[rgb]{0,0,0}\makebox(0,0)[b]{\smash{}}}%
+    \put(0.95910266,0.11287244){\color[rgb]{0,0,0}\makebox(0,0)[b]{\smash{thin}}}%
+    \put(0.95775482,0.08569054){\color[rgb]{0,0,0}\makebox(0,0)[b]{\smash{part}}}%
+    \put(0.56833753,0.14586858){\color[rgb]{0,0,0}\makebox(0,0)[b]{\smash{(b)}}}%
+    \put(0.51769307,0.20496519){\color[rgb]{0,0,0}\makebox(0,0)[b]{\smash{}}}%
+    \put(0.78416518,0.02626244){\color[rgb]{0,0,0}\makebox(0,0)[b]{\smash{thick part}}}%
+    \put(0.24658534,0.12406383){\color[rgb]{0,0,0}\makebox(0,0)[b]{\smash{inner side of pattern}}}%
+    \put(0.15943844,0.11291905){\color[rgb]{0,0,0}\makebox(0,0)[b]{\smash{}}}%
+  \end{picture}%
+\endgroup%

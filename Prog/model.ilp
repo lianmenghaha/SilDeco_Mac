@@ -1,0 +1,13 @@
+\ Model (null)_copy
+\ LP format - for model browsing. Use MPS format to capture full model detail.
+Minimize
+ 
+Subject To
+ c5384: x600 - x602 <= -1
+ c5389: - x600 + x602 <= -1
+Bounds
+ x600 free
+ x602 free
+Generals
+ x600 x602
+End

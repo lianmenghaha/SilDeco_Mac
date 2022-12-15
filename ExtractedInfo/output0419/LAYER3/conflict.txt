@@ -1,0 +1,19 @@
+no merge conflict:
+o4 3 o3 o5 o13
+o1 1 o2
+o11 1 o3
+o5 1 o4
+o13 1 o4
+o2 4 o1 o3 o9 o15
+o15 1 o2
+o3 4 o2 o4 o7 o11
+o9 2 o2 o7
+FIN
+
+no absorption conflict:
+o11 1 o10
+o13 1 o12
+o9 1 o8
+o15 1 o14
+o7 1 o6
+FIN
